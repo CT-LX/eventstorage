@@ -31,7 +31,7 @@ $(function () {
 
         $.ajax({
             type: "post",
-            url: "http://ajax.frontend.itheima.net/api/login",
+            url: "/api/login",
             data: $(this).serialize(),
             success: function (res) {
                 console.log(res);
@@ -62,7 +62,7 @@ $(function () {
             return layer.msg("两次密码不一致");
         }
         var data = $(this).serialize();
-        $.post('http://ajax.frontend.itheima.net/api/reguser', data, function (res) {
+        $.post('/api/reguser', data, function (res) {
             if (res.status !== 0) {
                 return layer.msg(res.message)
             }
