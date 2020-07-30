@@ -56,8 +56,9 @@ function initperson(data) {
         $(".layui-nav-img").hide();
     } else {
         // 显示图像
-        $(".imgbox").html(name).hide()
-        $(".layui-nav-img").attr("src", data.user_pic)
+        console.log(data)
+        $(".imgbox").hide()
+        $(".layui-nav-img").attr("src", data.user_pic);
 
     }
 }
