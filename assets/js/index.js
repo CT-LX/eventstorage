@@ -45,9 +45,10 @@ function getuser() {
 function initperson(data) {
     // console.log(data)
     // 显示对应的文字
-    if (data.nickname || data.username) {
-        $("#huanying").html(data.nickname)
-    }
+    var name = data.nickname || data.username
+
+    $("#huanying").html("欢迎 &nbsp;"  + name)
+
     if (data.user_pic == null) {
         // 显示第一个字母
         var name = data.username[0].toUpperCase();
@@ -56,7 +57,7 @@ function initperson(data) {
         $(".layui-nav-img").hide();
     } else {
         // 显示图像
-        console.log(data)
+        // console.log(data)
         $(".imgbox").hide()
         $(".layui-nav-img").attr("src", data.user_pic);
 

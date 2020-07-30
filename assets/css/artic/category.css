@@ -1,0 +1,11 @@
+.addboxs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 15px;
+}
+
+#widthinput {
+    padding-right: 30px;
+    margin-top: 15px;
+}
