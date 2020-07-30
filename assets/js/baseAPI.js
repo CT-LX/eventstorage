@@ -18,7 +18,7 @@ $.ajaxPrefilter(function (options) {
     options.complete = function (res) {
         // 后台返回res.responseJSON  message: "身份认证失败！"status: 1
         // console.log(res.responseJSON)
-        if(res.responseJSON.status == 1 && res.responseJSON.message == "身份认证失败！"){
+        if (res.responseJSON.status == 1 && res.responseJSON.message == "身份认证失败！") {
             // 清空token
             localStorage.removeItem("token")
             // 跳转到登录页面

@@ -6,9 +6,8 @@ $(function () {
     // complete 全局配置
 
     // 个人中心
+    getuser()
 
-
-    initperson();
 
     // 用户没有登录，就无法访问网页
     // 控制用户的访问权限，通过ajax的complete方法,
@@ -26,33 +25,40 @@ $(function () {
         // 清空token
         // 跳转到登录
     })
-
-
     // end
 })
-function initperson() {
+function getuser() {
     $.ajax({
         type: "get",
         url: "/my/userinfo",
         success: function (res) {
             // console.log(res)
             // console.log(res.data)
-            // 显示对应的文字
-            if (res.data.nickname || res.data.username) {
-                $("#huanying").html(res.data.username)
+            if (res.status !== 0) {
+                return layui.layer.msg('获取用户信息失败！')
             }
-            if (res.data.user_pic == null) {
-                // 显示第一个字母
-                var name = res.data.username[0].toUpperCase();
-                // console.log(name)
-                $(".imgbox").html(name).show()
-                $(".layui-nav-img").hide();
-            } else {
-                // 显示图像
-                $(".imgbox").html(name).hide()
-                $(".layui-nav-img").attr("src", res.data.user_pic)
-
-            }
+            // 调用 initperson 渲染用户的头像
+            initperson(res.data);
         }
     })
 }
+function initperson(data) {
+    // console.log(data)
+    // 显示对应的文字
+    if (data.nickname || data.username) {
+        $("#huanying").html(data.nickname)
+    }
+    if (data.user_pic == null) {
+        // 显示第一个字母
+        var name = data.username[0].toUpperCase();
+        // console.log(name)
+        $(".imgbox").html(name).show()
+        $(".layui-nav-img").hide();
+    } else {
+        // 显示图像
+        $(".imgbox").html(name).hide()
+        $(".layui-nav-img").attr("src", data.user_pic)
+
+    }
+}
+
