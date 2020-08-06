@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- 引入css layui -->
+    <link rel="stylesheet" href="/assets/lib/layui/css/layui.css">
+    <!-- corpper -->
+    <link rel="stylesheet" href="/assets/lib/cropper/cropper.css" />
+    <link rel="stylesheet" href="/assets/css/artic/pub.css">
+
+</head>
+
+<body>
+    <!-- 面板 -->
+    <div class="layui-card">
+        <div class="layui-card-header">修改文章</div>
+        <div class="layui-card-body">
+            <form class="layui-form" id="catelistpub" lay-filter="catelistpubs">
+                <input type="hidden" name="Id" style="display: none;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文章标题</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="title" required lay-verify="required" placeholder="请输入标题"
+                            autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <!-- 文章类别 -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文章类别</label>
+                    <div class="layui-input-block">
+                        <select name="cate_id" lay-verify="required" class="selectcata">
+                            <!-- <option value="">请选择文章类别</option>
+                            <option value="0">北京</option> -->
+                        </select>
+                    </div>
+                </div>
+                <!-- 富文本框 -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">文章内容</label>
+                    <div class="layui-input-block">
+                        <!-- 重要：将来这个 textarea 会被初始化为富文本编辑器 -->
+                        <textarea name="content"></textarea>
+                    </div>
+                </div>
+                <!-- 封面 -->
+                <div class="layui-form-item">
+                    <!-- 左侧的 label -->
+                    <label class="layui-form-label">文章封面</label>
+                    <!-- 选择封面区域 -->
+                    <div class="layui-input-block cover-box">
+                        <!-- 左侧裁剪区域 -->
+                        <div class="cover-left">
+                            <img id="image" src="/assets/images/sample2.jpg" alt="" />
+                        </div>
+                        <!-- 右侧预览区域和选择封面区域 -->
+                        <div class="cover-right">
+                            <!-- 预览的区域 -->
+                            <div class="img-preview"></div>
+                            <!-- 选择封面按钮 -->
+                            <button type="button" class="layui-btn layui-btn-danger selectimg">选择封面</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="file" name="" id="imgs" style="display: none;">
+
+
+                <!-- 发布 -->
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn fabu" lay-submit lay-filter="formDemo">发布</button>
+                        <button class="layui-btn caogao" lay-submit lay-filter="formDemo">存为草稿</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- 表单 -->
+    <!-- 图片裁剪 -->
+    <!-- 发布、草稿按钮 -->
+
+    <!-- 定义分类文章的模板 -->
+    <script type="text/html" id="catalists">
+        <option value="">请选择文章类别</option>
+       {{each data}}
+       <option value="0">{{$value.name}}</option>
+       {{/each}}
+    </script>
+
+
+    <!-- 引入jq -->
+    <script src="/assets/lib/jquery.js"></script>
+    <!-- cropper裁剪 -->
+    <script src="/assets/lib/cropper/Cropper.js"></script>
+    <script src="/assets/lib/cropper/jquery-cropper.js"></script>
+    <script src="/assets/lib/tinymce/tinymce.min.js"></script>
+    <script src="/assets/lib/tinymce/tinymce_setup.js"> </script>
+    <script src="/assets/lib/layui/layui.all.js"></script>
+    <script src="/assets/lib/template-web.js"></script>
+    <!-- //富文本框 -->
+    <script src="/assets/js/baseAPI.js"></script>
+    <!-- <script src="/assets/js/artic/pub.js"></script> -->
+    <script>
+        // 初始化富文本编辑器
+        initEditor()
+
+
+        // 1. 初始化图片裁剪器
+        var $image = $('#image')
+        // 2. 裁剪选项
+        var options = {
+            aspectRatio: 400 / 280,
+            preview: '.img-preview'
+        }
+        // 3. 初始化裁剪区域
+        $image.cropper(options)
+        //2. 点击触发change事件，获取图片路径
+        $(".selectimg").on("click", function () {
+            // 触发文件上传
+            $("#imgs").click();
+        })
+
+        $("#imgs").change(function (e) {
+            // console.log(1)
+            var file = e.target.files;
+            // console.log(file)
+            if (file.length === 0) {
+                return alert("请上传文件")
+            }
+            // 创建路径
+            var newImgURL = URL.createObjectURL(file[0]);
+
+            // 上传成功，重新定义裁剪区域
+            $image
+                .cropper('destroy') // 销毁旧的裁剪区域
+                .attr('src', newImgURL) // 重新设置图片路径
+                .cropper(options) // 重新初始化裁剪区域
+        })
+
+
+        // 1.文章类别渲染
+        catalist()
+        var state = "发布";
+
+        function catalist() {
+            $.ajax({
+                type: "get",
+                url: "/my/article/cates",
+                success: function (res) {
+                    // console.log(res.data)
+                    if (status != 0) {
+                        layui.layer.msg("获取文章分类列表失败")
+                    }
+                    // 引入模板引擎
+                    var html = template("catalists", res)
+                    $(".selectcata").html(html)
+                    // 调用layui的render方法渲染数据
+                    layui.form.render(); //更新全部
+                }
+            })
+        }
+
+
+        var id = location.search
+        // console.log(id)//?id3923
+        id = id.split("d")[1]
+        // console.log(id)
+
+        // 点击了存为草稿，修改文件发布状态
+        $(".caogao").on("click", function () {
+            state = "草稿";
+        })
+
+        $.ajax({
+            type: "get",
+            url: "/my/article/" + id,
+            // contentType: false,
+            // processData: false,
+            success: function (res) {
+                // console.log(res)
+                if (res.status != 0) {
+                    return layui.layer.msg("获取信息失败")
+                }
+                //跳转到发布页面 填充默认数据，
+
+                // form.val
+                layui.form.val("catelistpubs", res.data)
+
+
+            }
+        })
+
+        // 点击修改---/my/article/edit
+        $("#catelistpub").on("submit", function (e) {
+            e.preventDefault();
+            // 实例化formdata
+            e.preventDefault();
+            var fd = new FormData($("#catelistpub")[0])
+
+
+            //  将文章的发布状态，存到 fd 中
+            fd.append('state', state)
+
+            //  将封面裁剪过后的图片，输出为一个文件对象
+            $image.cropper('getCroppedCanvas', {
+                // 创建一个 Canvas 画布
+                width: 400,
+                height: 280
+            })
+                .toBlob(function (blob) {
+                    // 将 Canvas 画布上的内容，转化为文件对象
+                    // 得到文件对象后，进行后续的操作
+                    // 5. 将文件对象，存储到 fd 中
+                    fd.append('cover_img', blob)
+                    // console.log(blob)
+                    fd.forEach(function (item, index) {
+                        console.log(item)
+                        // console.log(index)
+                    })
+                    // 发起ajax请求，发布
+                    edits(fd)
+                })
+
+
+
+        })
+
+
+        function edits(fd) {
+            $.ajax({
+                type: "POST",
+                url: "/my/article/edit",
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    console.log(res)
+                    layui.layer.msg(res.message)
+                }
+            })
+
+        }
+
+
+        // $(".updata").on("click", function (e) {
+        //     e.preventDefault();
+        //     var fd = new FormData($("#catelistpub")[0])
+        //     fd.forEach(function (item) {
+        //         console.log(item)
+
+        //     })
+        //     //     $.ajax({
+        //     //         typeL: "POST",
+        //     //         url: "/my/article/edit",
+        //     //         data: fd,
+        //     //         processData: false,
+        //     //         contentType: false,
+        //     //         success: function (res) {
+        //     //             console.log(res)
+        //     //         }
+        //     //     })
+        // })
+
+    </script>
+</body>
+
+</html>
